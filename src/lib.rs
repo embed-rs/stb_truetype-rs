@@ -1,7 +1,19 @@
+#![feature(collections)]
+#![feature(core_intrinsics)]
+#![no_std]
+
+extern crate collections;
 extern crate byteorder;
+
 use byteorder::ByteOrder;
 use byteorder::BigEndian as BE;
-use ::std::ops::Deref;
+use core::ops::Deref;
+use core::mem;
+use collections::Vec;
+use float_impls::FloatImpls;
+
+mod float_impls;
+
 #[derive(Clone)]
 pub struct FontInfo<Data: Deref<Target=[u8]>> {
     data: Data,       // pointer to .ttf file
@@ -38,7 +50,7 @@ pub struct Vertex {
 
 impl Vertex {
     pub fn vertex_type(&self) -> VertexType {
-        unsafe{::std::mem::transmute(self.type_)}
+        unsafe{mem::transmute(self.type_)}
     }
 }
 
@@ -534,7 +546,7 @@ impl<Data: Deref<Target=[u8]>> FontInfo<Data> {
             for i in 0..n {
                 let flags = vertices[off + i].type_;
                 if flags == 255 {
-                    println!("{:?}", flags);
+                    //println!("{:?}", flags);
                 }
                 if flags & 2 != 0 {
                     let dx = points[0] as i32;
