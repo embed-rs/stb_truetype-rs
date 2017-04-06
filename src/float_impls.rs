@@ -128,23 +128,7 @@ impl FloatImpls for f32 {
     /// ```
     #[inline]
     fn floor(self) -> f32 {
-        // On MSVC LLVM will lower many math intrinsics to a call to the
-        // corresponding function. On MSVC, however, many of these functions
-        // aren't actually available as symbols to call, but rather they are all
-        // `static inline` functions in header files. This means that from a C
-        // perspective it's "compatible", but not so much from an ABI
-        // perspective (which we're worried about).
-        //
-        // The inline header functions always just cast to a f64 and do their
-        // operation, so we do that here as well, but only for MSVC targets.
-        //
-        // Note that there are many MSVC-specific float operations which
-        // redirect to this comment, so `floorf` is just one case of a missing
-        // function on MSVC, but there are many others elsewhere.
-        #[cfg(target_env = "msvc")]
-        return (self as f64).floor() as f32;
-        #[cfg(not(target_env = "msvc"))]
-        return unsafe { intrinsics::floorf32(self) };
+        self - (self % 1.0)
     }
 
     /// Returns the smallest integer greater than or equal to a number.
@@ -158,11 +142,7 @@ impl FloatImpls for f32 {
     /// ```
     #[inline]
     fn ceil(self) -> f32 {
-        // see notes above in `floor`
-        #[cfg(target_env = "msvc")]
-        return (self as f64).ceil() as f32;
-        #[cfg(not(target_env = "msvc"))]
-        return unsafe { intrinsics::ceilf32(self) };
+        -(-self).floor()
     }
 
     /// Returns the nearest integer to a number. Round half-way cases away from
