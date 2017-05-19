@@ -130,7 +130,7 @@ impl FloatImpls for f32 {
     fn floor(self) -> f32 {
         use core::mem;
         let mut self_int: u32 = unsafe { mem::transmute(self) };
-        let e = (((self_int >> 23) & 0xff) - 0x7f) as i32;
+        let e = (((self_int >> 23) & 0xff).wrapping_sub(0x7f)) as i32;
 
         if e >= 23 {
             return self;
