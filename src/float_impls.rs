@@ -128,7 +128,30 @@ impl FloatImpls for f32 {
     /// ```
     #[inline]
     fn floor(self) -> f32 {
-        self - (self % 1.0)
+        use core::mem;
+        let mut self_int: u32 = unsafe { mem::transmute(self) };
+        let e = (((self_int >> 23) & 0xff) - 0x7f) as i32;
+
+        if e >= 23 {
+            return self;
+        }
+        if e >= 0 {
+            let m: u32 = 0x007fffff >> e;
+            if (self_int & m) == 0 {
+                return self;
+            }
+            if self_int >> 31 != 0 {
+                self_int += m;
+            }
+            self_int &= !m;
+        } else {
+            if self_int >> 31 == 0 {
+                self_int = 0;
+            } else if self_int << 1 != 0 {
+                self_int = unsafe {mem::transmute(-1.0f32)};
+            }
+        }
+        unsafe { mem::transmute(self_int) }
     }
 
     /// Returns the smallest integer greater than or equal to a number.
