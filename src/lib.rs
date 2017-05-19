@@ -12,7 +12,7 @@ use core::mem;
 use collections::Vec;
 use float_impls::FloatImpls;
 
-mod float_impls;
+pub mod float_impls;
 
 #[derive(Clone)]
 pub struct FontInfo<Data: Deref<Target=[u8]>> {
