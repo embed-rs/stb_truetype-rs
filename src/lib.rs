@@ -1,15 +1,15 @@
-#![feature(collections)]
+#![feature(alloc)]
 #![feature(core_intrinsics)]
 #![no_std]
 
-extern crate collections;
+extern crate alloc;
 extern crate byteorder;
 
 use byteorder::ByteOrder;
 use byteorder::BigEndian as BE;
 use core::ops::Deref;
 use core::mem;
-use collections::Vec;
+use alloc::Vec;
 use float_impls::FloatImpls;
 
 pub mod float_impls;
