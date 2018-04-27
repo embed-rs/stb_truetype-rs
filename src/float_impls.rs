@@ -1,21 +1,13 @@
-use core::{num, intrinsics};
+use core::intrinsics;
 use core::f32::{NAN, NEG_INFINITY};
 
 pub trait FloatImpls {
-    fn is_nan(self) -> bool;
-    fn is_infinite(self) -> bool;
-    fn is_finite(self) -> bool;
-    fn is_normal(self) -> bool;
     fn floor(self) -> f32;
     fn ceil(self) -> f32;
     fn round(self) -> f32;
     fn trunc(self) -> f32;
     fn fract(self) -> f32;
-    fn signum(self) -> f32;
-    fn is_sign_positive(self) -> bool;
-    fn is_sign_negative(self) -> bool;
     fn mul_add(self, a: f32, b: f32) -> f32;
-    fn powi(self, n: i32) -> f32;
     fn powf(self, n: f32) -> f32;
     fn sqrt(self) -> f32;
     fn exp(self) -> f32;
@@ -24,7 +16,6 @@ pub trait FloatImpls {
     fn log(self, base: f32) -> f32;
     fn log2(self) -> f32;
     fn log10(self) -> f32;
-    fn to_degrees(self) -> f32;
     fn max(self, other: f32) -> f32;
     fn min(self, other: f32) -> f32;
     fn asinh(self) -> f32;
@@ -32,91 +23,6 @@ pub trait FloatImpls {
 }
 
 impl FloatImpls for f32 {
-    /// Returns `true` if this value is `NaN` and false otherwise.
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let nan = f32::NAN;
-    /// let f = 7.0_f32;
-    ///
-    /// assert!(nan.is_nan());
-    /// assert!(!f.is_nan());
-    /// ```
-    #[inline]
-    fn is_nan(self) -> bool {
-        num::Float::is_nan(self)
-    }
-
-    /// Returns `true` if this value is positive infinity or negative infinity and
-    /// false otherwise.
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let f = 7.0f32;
-    /// let inf = f32::INFINITY;
-    /// let neg_inf = f32::NEG_INFINITY;
-    /// let nan = f32::NAN;
-    ///
-    /// assert!(!f.is_infinite());
-    /// assert!(!nan.is_infinite());
-    ///
-    /// assert!(inf.is_infinite());
-    /// assert!(neg_inf.is_infinite());
-    /// ```
-    #[inline]
-    fn is_infinite(self) -> bool {
-        num::Float::is_infinite(self)
-    }
-
-    /// Returns `true` if this number is neither infinite nor `NaN`.
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let f = 7.0f32;
-    /// let inf = f32::INFINITY;
-    /// let neg_inf = f32::NEG_INFINITY;
-    /// let nan = f32::NAN;
-    ///
-    /// assert!(f.is_finite());
-    ///
-    /// assert!(!nan.is_finite());
-    /// assert!(!inf.is_finite());
-    /// assert!(!neg_inf.is_finite());
-    /// ```
-    #[inline]
-    fn is_finite(self) -> bool {
-        num::Float::is_finite(self)
-    }
-
-    /// Returns `true` if the number is neither zero, infinite,
-    /// [subnormal][subnormal], or `NaN`.
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let min = f32::MIN_POSITIVE; // 1.17549435e-38f32
-    /// let max = f32::MAX;
-    /// let lower_than_min = 1.0e-40_f32;
-    /// let zero = 0.0_f32;
-    ///
-    /// assert!(min.is_normal());
-    /// assert!(max.is_normal());
-    ///
-    /// assert!(!zero.is_normal());
-    /// assert!(!f32::NAN.is_normal());
-    /// assert!(!f32::INFINITY.is_normal());
-    /// // Values between `0` and `min` are Subnormal.
-    /// assert!(!lower_than_min.is_normal());
-    /// ```
-    /// [subnormal]: https://en.wikipedia.org/wiki/Denormal_number
-    #[inline]
-    fn is_normal(self) -> bool {
-        num::Float::is_normal(self)
-    }
-
     /// Returns the largest integer less than or equal to a number.
     ///
     /// ```
@@ -215,67 +121,6 @@ impl FloatImpls for f32 {
         self - self.trunc()
     }
 
-    /// Returns a number that represents the sign of `self`.
-    ///
-    /// - `1.0` if the number is positive, `+0.0` or `INFINITY`
-    /// - `-1.0` if the number is negative, `-0.0` or `NEG_INFINITY`
-    /// - `NAN` if the number is `NAN`
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let f = 3.5_f32;
-    ///
-    /// assert_eq!(f.signum(), 1.0);
-    /// assert_eq!(f32::NEG_INFINITY.signum(), -1.0);
-    ///
-    /// assert!(f32::NAN.signum().is_nan());
-    /// ```
-    #[inline]
-    fn signum(self) -> f32 {
-        num::Float::signum(self)
-    }
-
-    /// Returns `true` if `self`'s sign bit is positive, including
-    /// `+0.0` and `INFINITY`.
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let nan = f32::NAN;
-    /// let f = 7.0_f32;
-    /// let g = -7.0_f32;
-    ///
-    /// assert!(f.is_sign_positive());
-    /// assert!(!g.is_sign_positive());
-    /// // Requires both tests to determine if is `NaN`
-    /// assert!(!nan.is_sign_positive() && !nan.is_sign_negative());
-    /// ```
-    #[inline]
-    fn is_sign_positive(self) -> bool {
-        num::Float::is_sign_positive(self)
-    }
-
-    /// Returns `true` if `self`'s sign is negative, including `-0.0`
-    /// and `NEG_INFINITY`.
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let nan = f32::NAN;
-    /// let f = 7.0f32;
-    /// let g = -7.0f32;
-    ///
-    /// assert!(!f.is_sign_negative());
-    /// assert!(g.is_sign_negative());
-    /// // Requires both tests to determine if is `NaN`.
-    /// assert!(!nan.is_sign_positive() && !nan.is_sign_negative());
-    /// ```
-    #[inline]
-    fn is_sign_negative(self) -> bool {
-        num::Float::is_sign_negative(self)
-    }
-
     /// Fused multiply-add. Computes `(self * a) + b` with only one rounding
     /// error. This produces a more accurate result with better performance than
     /// a separate multiplication operation followed by an add.
@@ -295,23 +140,6 @@ impl FloatImpls for f32 {
     #[inline]
     fn mul_add(self, a: f32, b: f32) -> f32 {
         unsafe { intrinsics::fmaf32(self, a, b) }
-    }
-
-    /// Raises a number to an integer power.
-    ///
-    /// Using this function is generally faster than using `powf`
-    ///
-    /// ```
-    /// use std::f32;
-    ///
-    /// let x = 2.0_f32;
-    /// let abs_difference = (x.powi(2) - x*x).abs();
-    ///
-    /// assert!(abs_difference <= f32::EPSILON);
-    /// ```
-    #[inline]
-    fn powi(self, n: i32) -> f32 {
-        num::Float::powi(self, n)
     }
 
     /// Raises a number to a floating point power.
@@ -481,22 +309,6 @@ impl FloatImpls for f32 {
         return (self as f64).log10() as f32;
         #[cfg(not(target_env = "msvc"))]
         return unsafe { intrinsics::log10f32(self) };
-    }
-
-    /// Converts radians to degrees.
-    ///
-    /// ```
-    /// use std::f32::{self, consts};
-    ///
-    /// let angle = consts::PI;
-    ///
-    /// let abs_difference = (angle.to_degrees() - 180.0).abs();
-    ///
-    /// assert!(abs_difference <= f32::EPSILON);
-    /// ```
-    #[inline]
-    fn to_degrees(self) -> f32 {
-        num::Float::to_degrees(self)
     }
 
     /// Returns the maximum of the two numbers.
